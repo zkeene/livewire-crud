@@ -113,7 +113,7 @@ class Crud extends GeneratorCommand
                 $str .= $twotabs . "'" . str_replace('-', '_', Str::slug($column)) . "' => 'required'," . PHP_EOL;
             }
         }
-        return 'protected $rules = [' . PHP_EOL . $str . PHP_EOL . $onetab . '];';
+        return 'protected $rules = [' . PHP_EOL . $str . $onetab . '];';
     }
 
     public function buildProperties(): string
@@ -153,14 +153,24 @@ class Crud extends GeneratorCommand
         $class = 'App\\Models\\' . $this->arguments()['name'];
         $model = new $class;
         $columns = $model->getFillable();
+        $columnCount = count($columns);
         $str = '';
+        $padding = '        ';
         $c = 1;
         foreach ($columns as $column) {
             if ($column != 'created_at' || $column != 'updated_at') {
-                if ($c > 1) {
-                    $str .= '$this->' . str_replace('-', '_', Str::slug($column)) . '= $model->' . $column . ';' . PHP_EOL;
+                if ($c == $columnCount) {
+                    if ($c == 1) {
+                        $str .= '$this->' . str_replace('-', '_', Str::slug($column)) . '= $model->' . $column . ';';
+                    } else {
+                        $str .= $padding . '$this->' . str_replace('-', '_', Str::slug($column)) . '= $model->' . $column . ';';
+                    }
                 } else {
-                    $str .= '$this->' . str_replace('-', '_', Str::slug($column)) . '= $model->' . $column . ';' . PHP_EOL;
+                    if ($c == 1) {
+                        $str .= '$this->' . str_replace('-', '_', Str::slug($column)) . '= $model->' . $column . ';' . PHP_EOL;
+                    } else {
+                        $str .= $padding. '$this->' . str_replace('-', '_', Str::slug($column)) . '= $model->' . $column . ';' . PHP_EOL;
+                    }
                 }
             }
             $c++;
@@ -175,18 +185,19 @@ class Crud extends GeneratorCommand
         $model = new $class;
         $columns = $model->getFillable();
         $str = '';
+        $padding = '        ';
         $c = 1;
         foreach ($columns as $column) {
             if ($column != 'created_at' || $column != 'updated_at') {
                 if ($c > 1) {
-                    $str .= '$model->' . str_replace('-', '_', Str::slug($column)) . '= $this->' . str_replace('-', '_', Str::slug($column)) . ';' . PHP_EOL;
+                    $str .= $padding . '$model->' . str_replace('-', '_', Str::slug($column)) . '= $this->' . str_replace('-', '_', Str::slug($column)) . ';' . PHP_EOL;
                 } else {
-                    $str .= '   $model->' . str_replace('-', '_', Str::slug($column)) . '= $this->' . str_replace('-', '_', Str::slug($column)) . ';' . PHP_EOL;
+                    $str .= '$model->' . str_replace('-', '_', Str::slug($column)) . '= $this->' . str_replace('-', '_', Str::slug($column)) . ';' . PHP_EOL;
                 }
             }
             $c++;
         }
-        $str .= ' $model->save();';
+        $str .= '$model->save();';
 
         return $str;
     }
