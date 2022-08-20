@@ -106,12 +106,14 @@ class Crud extends GeneratorCommand
         $model = new $class;
         $columns = $model->getFillable();
         $str = '';
+        $onetab = '    ';
+        $twotabs = '        ';
         foreach ($columns as $column) {
             if ($column != 'created_at' || $column != 'updated_at') {
-                $str .= "'" . str_replace('-', '_', Str::slug($column)) . "' => 'required'," . PHP_EOL;
+                $str .= $twotabs . "'" . str_replace('-', '_', Str::slug($column)) . "' => 'required'," . PHP_EOL;
             }
         }
-        return 'protected $rules = [' . PHP_EOL . $str . PHP_EOL . '];' . PHP_EOL;
+        return 'protected $rules = [' . PHP_EOL . $str . PHP_EOL . $onetab . '];';
     }
 
     public function buildProperties(): string
@@ -122,14 +124,23 @@ class Crud extends GeneratorCommand
             throw new \Exception('Model Not Found. Please Check if Model Exists at -'.$class);
         }
         $columns = $model->getFillable();
+        $columnCount = count($columns);
         $str = '';
         $c = 1;
         foreach ($columns as $column) {
             if ($column != 'created_at' || $column != 'updated_at') {
                 if ($c == 1) {
-                    $str .= 'public $' . str_replace('-', '_', Str::slug($column)) . ';' . PHP_EOL;
+                    if($c == $columnCount) {
+                        $str .= 'public $' . str_replace('-', '_', Str::slug($column)) . ';';
+                    } else {
+                        $str .= 'public $' . str_replace('-', '_', Str::slug($column)) . ';' . PHP_EOL;
+                    }
                 } else {
-                    $str .= '   public $' . str_replace('-', '_', Str::slug($column)) . ';' . PHP_EOL;
+                    if($c == $columnCount) {
+                        $str .= '    public $' . str_replace('-', '_', Str::slug($column)) . ';';
+                    } else {
+                        $str .= '    public $' . str_replace('-', '_', Str::slug($column)) . ';' . PHP_EOL;
+                    }
                 }
             }
             $c++;
