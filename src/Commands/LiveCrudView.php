@@ -177,12 +177,8 @@ class LiveCrudView extends GeneratorCommand
 
     public function getInput($name): string
     {
-        if (config('livecrud.template') == 'bootstrap') {
-            return '<th>' . strtoupper($name) . '
-                            </th>' . PHP_EOL;
-        }
-        return '<th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                            ' . strtoupper($name) . '
+        return '<th scope="col" class="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider">
+                            ' . $name . '
                             </th>' . PHP_EOL;
     }
 
@@ -196,13 +192,6 @@ class LiveCrudView extends GeneratorCommand
      */
     protected function getStub()
     {
-        if (config('livecrud.template') == 'bootstrap') {
-            if (file_exists(base_path() . '/stubs/bootstrap.view.php.stub')) {
-                return base_path() . '/stubs/bootstrap.view.php.stub';
-            }
-            return base_path() . '/vendor/zkeene/livecrud/src/stubs/bootstrap.view.php.stub';
-        }
-
         if (file_exists(base_path() . '/stubs/view.php.stub')) {
             return base_path() . '/stubs/view.php.stub';
         }

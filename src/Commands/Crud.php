@@ -194,14 +194,6 @@ class Crud extends GeneratorCommand
     {
         $this->checkIfModelExists();
 
-        if(config('livecrud.template') == 'bootstrap')
-        {
-            if (file_exists(base_path() . '/stubs/bootstrap.crud.php.stub')){
-                return base_path() . '/stubs/bootstrap.crud.php.stub';
-            }
-            return base_path().'/vendor/zkeene/livecrud/src/stubs/bootstrap.crud.php.stub';
-        }
-
         if (file_exists(base_path() . '/stubs/crud.php.stub')){
             return base_path() . '/stubs/crud.php.stub';
         }
