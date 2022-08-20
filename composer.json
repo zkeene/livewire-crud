@@ -1,0 +1,41 @@
+{
+    "name": "zkeene/livecrud",
+    "description": "Generate Basic Crud Operations With Livewire and Tailwind Css For Laravel",
+    "license": "MIT",
+    "version": "v1",
+    "authors": [
+        {
+            "name": "Zac Keene",
+            "email": "zkeene@gmail.com"
+        }
+    ],
+    "homepage": "https://github.com/zkeene/livewire-crud",
+    "keywords": ["Laravel", "LiveCrud"],
+    "require": {
+        "illuminate/support": "~7|~8"
+    },
+    "require-dev": {
+        "phpunit/phpunit": "~9.0",
+        "orchestra/testbench": "~5|~6"
+    },
+    "autoload": {
+        "psr-4": {
+            "Zkeene\\LiveCrud\\": "src/"
+        }
+    },
+    "autoload-dev": {
+        "psr-4": {
+            "Zkeene\\LiveCrud\\Tests\\": "tests"
+        }
+    },
+    "extra": {
+        "laravel": {
+            "providers": [
+                "Zkeene\\LiveCrud\\LiveCrudServiceProvider"
+            ],
+            "aliases": {
+                "LiveCrud": "Zkeene\\LiveCrud\\Facades\\LiveCrud"
+            }
+        }
+    }
+}
