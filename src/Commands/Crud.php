@@ -60,13 +60,23 @@ class Crud extends GeneratorCommand
         $model = new $class;
         $columns = $model->getFillable();
         $str = '';
+        $columnCount = count($columns);
+        $padding = '        ';
         $c = 1;
         foreach ($columns as $column) {
             if ($column != 'created_at' || $column != 'updated_at') {
                 if ($c == 1) {
-                    $str .= '$this->'.str_replace('-', '_', Str::slug($column)) . '= "";' . PHP_EOL;
+                    if ($c == $columnCount) {
+                        $str .= '$this->'.str_replace('-', '_', Str::slug($column)) . '= "";';
+                    } else {
+                        $str .= '$this->'.str_replace('-', '_', Str::slug($column)) . '= "";' . PHP_EOL;
+                    }
                 } else {
-                    $str .= '$this->'.str_replace('-', '_', Str::slug($column)) . '= "";' . PHP_EOL;
+                    if ($c == $columnCount) {
+                        $str .= $padding . '$this->'.str_replace('-', '_', Str::slug($column)) . '= "";';
+                    } else {
+                        $str .= $padding . '$this->'.str_replace('-', '_', Str::slug($column)) . '= "";' . PHP_EOL;
+                    }
                 }
             }
             $c++;
@@ -197,7 +207,7 @@ class Crud extends GeneratorCommand
             }
             $c++;
         }
-        $str .= '$model->save();';
+        $str .= $padding . '$model->save();';
 
         return $str;
     }

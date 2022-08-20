@@ -88,16 +88,23 @@ class LiveCrudView extends GeneratorCommand
         $class = 'App\\Models\\' . $this->arguments()['name'];
         $model = new $class;
         $columns = $model->getFillable();
+        $columnCount = count($columns);
         $str = '';
         $c = 1;
-        $str .= '@forelse($rows as $row)' . PHP_EOL;
-        $str .= '<tr>';
         foreach ($columns as $column) {
             if ($column != 'created_at' || $column != 'updated_at') {
                 if ($c == 1) {
-                    $str .= $this->getDynamicData(str_replace('-', ' ', Str::slug($column))) . PHP_EOL;
+                    if ($c == $columnCount) {
+                        $str .= $this->getDynamicData(str_replace('-', ' ', Str::slug($column)));
+                    } else {
+                        $str .= $this->getDynamicData(str_replace('-', ' ', Str::slug($column))) . PHP_EOL;
+                    }
                 } else {
-                    $str .= $this->getDynamicData(str_replace('-', ' ', Str::slug($column))) . PHP_EOL;
+                    if ($c == $columnCount) {
+                        $str .= $this->getDynamicData(str_replace('-', ' ', Str::slug($column)));
+                    } else {
+                        $str .= $this->getDynamicData(str_replace('-', ' ', Str::slug($column))) . PHP_EOL;
+                    }
                 }
             }
             $c++;
@@ -105,8 +112,7 @@ class LiveCrudView extends GeneratorCommand
         $str .= '<td class="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
                             <a href="#" class="text-indigo-600 hover:text-indigo-900" wire:click="edit({{ $row->id }})">{{ __("Edit") }}</a>
                             <a href="#" class="text-indigo-600 hover:text-indigo-900" wire:click="confirmDelete({{ $row->id }})">{{ __("Delete") }}</a>
-                        </td></tr>';
-        $str .= '@empty  <tr><td>No Records Found</td></tr>   @endforelse' . PHP_EOL;
+                        </td>';
         return $str;
     }
 

@@ -38,13 +38,19 @@
                         <thead class="bg-gray-100 text-gray-600 text-left text-xs uppercase tracking-wider">
                         <tr>
                             {{ headings }}
-                            <th scope="col" class="relative px-6 py-3">
+                            <th scope="col" class="px-6 py-3 relative">
                                 <span class="sr-only">Actions</span>
                             </th>
                         </tr>
                         </thead>
                         <tbody class="bg-white divide-y divide-gray-200">
-                        {{ renderedData }}
+                            @forelse($rows as $row)
+                                <tr>
+                                {{ renderedData }}
+                                </tr>
+                            @empty  
+                                <tr><td>No Records Found</td></tr>   
+                            @endforelse
                         </tbody>
                     </table>
                     <div class="p-2">
