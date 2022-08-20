@@ -159,25 +159,35 @@ class LiveCrudView extends GeneratorCommand
         $class = 'App\\Models\\' . $this->arguments()['name'];
         $model = new $class;
         $columns = $model->getFillable();
+        $columnCount = count($columns);
         $c = 1;
         $str = '';
+        $padding = '    ';
         foreach ($columns as $column) {
             if ($column != 'created_at' || $column != 'updated_at') {
-                if ($c == 1) {
-                    $str .= $this->getInput(str_replace('-', ' ', Str::slug($column))) . PHP_EOL;
+                if ($c==1) {
+                    if($c!=$columnCount){
+                        $str .= $this->getInput(str_replace('-', ' ', Str::slug($column))) . PHP_EOL;
+                    } else {
+                        $str .= $this->getInput(str_replace('-', ' ', Str::slug($column)));
+                    }
+
                 } else {
-                    $str .= $this->getInput(str_replace('-', ' ', Str::slug($column))) . PHP_EOL;
+                    if($c!=$columnCount){
+                        $str .= $padding . $this->getInput(str_replace('-', ' ', Str::slug($column))) . PHP_EOL;
+                    } else {
+                        $str .= $padding . $this->getInput(str_replace('-', ' ', Str::slug($column)));
+                    }
                 }
             }
             $c++;
         }
-
         return $str;
     }
 
     public function getInput($name): string
     {
-        return '<th scope="col" class="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider">
+        return '<th scope="col" class="px-6 py-3">
                             ' . $name . '
                             </th>' . PHP_EOL;
     }
