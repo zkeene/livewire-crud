@@ -182,7 +182,7 @@ class Crud extends GeneratorCommand
         $columns = $model->getFillable();
         $columnCount = count($columns);
         $lower = Str::of($name)->lower();
-        $str = "$$lower = $name::find($primaryId);";
+        $str = '$' . $lower . ' = ' . $name . '::find($primaryId);';
         $padding = '        ';
         $c = 1;
         foreach ($columns as $column) {
