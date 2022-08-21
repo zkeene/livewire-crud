@@ -90,11 +90,11 @@ class Crud extends GeneratorCommand
         $name = $this->arguments()['name'];
         $class = 'App\\Models\\' . $name;
         $model = new $class;
-        $singular_lower = $name->lower();
-        $plural_lower = $name->plural()->lower();
+        $singular_lower = Str::of($name)->lower();
+        $plural_lower = Str::of($name)->plural()->lower();
         $columns = $model->getFillable();
         $columnCount = count($columns);
-        $str = '$' . Str::of($this->arguments()['name'])->plural()->lower() . ' = ' . $this->arguments()['name'] . '::';
+        $str = '$' . $plural_lower . ' = ' . $name . '::';
         $i = 1;
         $padding2 = '        ';
         $padding3 = '            ';
@@ -181,7 +181,7 @@ class Crud extends GeneratorCommand
         $model = new $class;
         $columns = $model->getFillable();
         $columnCount = count($columns);
-        $lower = $name->lower();
+        $lower = Str::of($name)->lower();
         $str = "$$lower = $name::find($primaryId);";
         $padding = '        ';
         $c = 1;
@@ -210,7 +210,7 @@ class Crud extends GeneratorCommand
     {
         $name = $this->arguments()['name'];
         $class = 'App\\Models\\' . $name;
-        $lower = $name->lower();
+        $lower = Str::of($name)->lower();
         $model = new $class;
         $columns = $model->getFillable();
         $str = '$' . $lower. ' = new ' . $name . '();';
@@ -235,7 +235,7 @@ class Crud extends GeneratorCommand
     {
         $name = $this->arguments()['name'];
         $class = 'App\\Models\\' . $name;
-        $lower = $name->lower();
+        $lower = Str::of($name)->lower();
         $model = new $class;
         $columns = $model->getFillable();
         $str = '$' . $lower. ' = ' . $name . '::find($this->primaryId);';
