@@ -139,7 +139,7 @@ class LiveCrudView extends GeneratorCommand
     public function getDynamicData($column): string
     {
         $modelName = Str::of($this->arguments()['name'])->lower();
-        return '<td class="px-6 py-4 whitespace-nowrap">{{ $'. $modelName . '->' . $column . '}}</td>';
+        return '<td class="px-6 py-4 whitespace-nowrap">{{ $'. $modelName . '->' . $column . ' }}</td>';
     }
 
     public function getHeadings(): string

@@ -18,18 +18,17 @@ class Crud extends GeneratorCommand
     {
         parent::handle();
 
+        if (!is_dir(app_path('http/livewire'))) {
+            mkdir(app_path('http/livewire'));
+        }
+        $componentPath = app_path('http/livewire/') . $this->arguments()['name'] . 'LiveComponent.php';
+        $content = file_get_contents($this->getStub());
 
-        // Get the fully qualified class name (FQN)
-        $class = $this->qualifyClass($this->getNameInput());
-        $filename = $class . 'LiveComponent';
-        // get the destination path, based on the default namespace
-        $path = $this->getPath($filename);
-        $content = file_get_contents($path);
         // Update the file content with additional data (regular expressions)
         $this->info('Generating Livewire Component');
 
         $content = $this->buildContent($content);
-        file_put_contents($path, $content);
+        file_put_contents($componentPath, $content);
         $this->info('Livewire Component Generated');
 
         $this->info('Generating View');
