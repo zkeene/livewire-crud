@@ -46,7 +46,11 @@
                         <tbody class="bg-white divide-y divide-gray-200">
                             @forelse($rows as $row)
                                 <tr>
-                                {{ renderedData }}
+                                    {{ renderedData }}
+                                    <td class="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
+                                        <a href="#" class="text-indigo-600 hover:text-indigo-900" wire:click="edit({{ $row->id }})">{{ __("Edit") }}</a>
+                                        <a href="#" class="text-indigo-600 hover:text-indigo-900" wire:click="confirmDelete({{ $row->id }})">{{ __("Delete") }}</a>
+                                    </td>
                                 </tr>
                             @empty  
                                 <tr><td>No Records Found</td></tr>   
@@ -86,14 +90,11 @@
                                 {{ $mode == 'create' ? 'Add New Record' : 'Update Record ' }}
                             </h3>
                         </div>
-
                         <div class="bg-white px-4 pt-5 pb-4 sm:p-6 sm:pb-4">
                             <div class="sm:flex sm:items-start">
-
                                 <div class="mt-3 text-center sm:mt-0 sm:ml-4 sm:text-left w-full">
-
                                     <div class="mt-2">
-                                       {{ form }}
+                                        {{ form }}
                                     </div>
                                 </div>
                             </div>

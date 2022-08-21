@@ -49,14 +49,24 @@ class LiveCrudView extends GeneratorCommand
         $class = 'App\\Models\\' . $this->arguments()['name'];
         $model = new $class;
         $columns = $model->getFillable();
+        $columnCount = count($columns);
         $str = '';
+        $padding = '        ';
         $c = 1;
         foreach ($columns as $column) {
             if ($column != 'created_at' || $column != 'updated_at') {
                 if ($c == 1) {
-                    $str .= $this->makeInput($column) . PHP_EOL;
+                    if($c == $columnCount) {
+                        $str .= $this->makeInput($column);
+                    } else {
+                        $str .= $this->makeInput($column) . PHP_EOL;
+                    }
                 } else {
-                    $str .= $this->makeInput($column) . PHP_EOL;
+                    if($c == $columnCount) {
+                        $str .= $padding . $this->makeInput($column);
+                    } else {
+                        $str .= $padding . $this->makeInput($column) . PHP_EOL;
+                    }
                 }
             }
             $c++;
@@ -69,7 +79,7 @@ class LiveCrudView extends GeneratorCommand
         $type = $this->getType($name);
         $label = ucfirst(str_replace('-', ' ', Str::slug($name)));
         $message = '{{ $message }}';
-            return "<div><label class='block'><span class='text-gray-700 @error('{$name}') text-red-500  @enderror'>{$label}</span><input type='{$type}' class='mt-1 block w-full rounded-md border-gray-300 shadow-sm @error('{$name}')  border-red-500 @enderror focus:border-indigo-300 focus:ring focus:ring-indigo-200 focus:ring-opacity-50' wire:model='{$name}'>@error('{$name}')<span class='text-red-500 text-sm'>{$message}</span>@enderror</label></div>";
+        return "<div><label class='block'><span class='text-gray-700 @error('{$name}') text-red-500  @enderror'>{$label}</span><input type='{$type}' class='mt-1 block w-full rounded-md border-gray-300 shadow-sm @error('{$name}')  border-red-500 @enderror focus:border-indigo-300 focus:ring focus:ring-indigo-200 focus:ring-opacity-50' wire:model='{$name}'>@error('{$name}')<span class='text-red-500 text-sm'>{$message}</span>@enderror</label></div>";
     }
 
     public function getType($name)
@@ -109,10 +119,6 @@ class LiveCrudView extends GeneratorCommand
             }
             $c++;
         }
-        $str .= '<td class="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
-                            <a href="#" class="text-indigo-600 hover:text-indigo-900" wire:click="edit({{ $row->id }})">{{ __("Edit") }}</a>
-                            <a href="#" class="text-indigo-600 hover:text-indigo-900" wire:click="confirmDelete({{ $row->id }})">{{ __("Delete") }}</a>
-                        </td>';
         return $str;
     }
 
@@ -133,9 +139,17 @@ class LiveCrudView extends GeneratorCommand
         foreach ($columns as $column) {
             if ($column != 'created_at' || $column != 'updated_at') {
                 if ($c==1) {
-                    $str .= $this->getInput(str_replace('-', ' ', Str::slug($column)));
+                    if ($c == $columnCount) {
+                        $str .= $this->getInput(str_replace('-', ' ', Str::slug($column)));
+                    } else {
+                        $str .= $this->getInput(str_replace('-', ' ', Str::slug($column))) . PHP_EOL;
+                    }
                 } else {
-                    $str .= $padding . $this->getInput(str_replace('-', ' ', Str::slug($column)));
+                    if ($c == $columnCount) {
+                        $str .= $padding . $this->getInput(str_replace('-', ' ', Str::slug($column)));
+                    } else {
+                        $str .= $padding . $this->getInput(str_replace('-', ' ', Str::slug($column))) . PHP_EOL;
+                    }
                 }
             }
             $c++;
@@ -145,7 +159,7 @@ class LiveCrudView extends GeneratorCommand
 
     public function getInput($name): string
     {
-        return '<th scope="col" class="px-6 py-3">' . $name . '</th>' . PHP_EOL;
+        return '<th scope="col" class="px-6 py-3">' . $name . '</th>';
     }
 
 
