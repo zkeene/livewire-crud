@@ -13,7 +13,6 @@ class LiveCrudView extends GeneratorCommand
 
     protected $description = 'Generate View For Crud Command';
 
-
     protected $emailNames = [
         'email',
         'email_address',
@@ -79,7 +78,16 @@ class LiveCrudView extends GeneratorCommand
         $type = $this->getType($name);
         $label = ucfirst(str_replace('-', ' ', Str::slug($name)));
         $message = '{{ $message }}';
-        return "<div><label class='block'><span class='text-gray-700 @error('{$name}') text-red-500  @enderror'>{$label}</span><input type='{$type}' class='mt-1 block w-full rounded-md border-gray-300 shadow-sm @error('{$name}')  border-red-500 @enderror focus:border-indigo-300 focus:ring focus:ring-indigo-200 focus:ring-opacity-50' wire:model='{$name}'>@error('{$name}')<span class='text-red-500 text-sm'>{$message}</span>@enderror</label></div>";
+        $output = "<div><label class='block'><span class='text-gray-700 @error('{$name}') text-red-500  @enderror'>{$label}</span>";
+        if ($type == 'foreignid'){
+            $output .= "<select class='mt-1 block w-full rounded-md border-gray-300 shadow-sm @error('{$name}') border-red-500 @enderror focus:border-indigo-300 focus:ring focus:ring-indigo-200 focus:ring-opacity-50' wire:model='{$name}'>";
+            $output .= "";
+            $output .= "</select>";
+        } else {
+            $output .= "<input type='{$type}' class='mt-1 block w-full rounded-md border-gray-300 shadow-sm @error('{$name}') border-red-500 @enderror focus:border-indigo-300 focus:ring focus:ring-indigo-200 focus:ring-opacity-50' wire:model='{$name}'>";
+        }
+        $output .= "@error('{$name}')<span class='text-red-500 text-sm'>{$message}</span>@enderror</label></div>";
+        return $output;
     }
 
     public function getType($name)
@@ -89,6 +97,9 @@ class LiveCrudView extends GeneratorCommand
         }
         if (strtolower($name) == 'password') {
             return 'password';
+        }
+        if (substr($name, -3) == '_id') {
+            return 'foreignid';
         }
         return 'text';
     }
@@ -100,6 +111,7 @@ class LiveCrudView extends GeneratorCommand
         $columns = $model->getFillable();
         $columnCount = count($columns);
         $str = '';
+        $padding = '                                    ';
         $c = 1;
         foreach ($columns as $column) {
             if ($column != 'created_at' || $column != 'updated_at') {
@@ -111,9 +123,9 @@ class LiveCrudView extends GeneratorCommand
                     }
                 } else {
                     if ($c == $columnCount) {
-                        $str .= $this->getDynamicData($column);
+                        $str .= $padding . $this->getDynamicData($column);
                     } else {
-                        $str .= $this->getDynamicData($column) . PHP_EOL;
+                        $str .= $padding . $this->getDynamicData($column) . PHP_EOL;
                     }
                 }
             }
@@ -124,8 +136,7 @@ class LiveCrudView extends GeneratorCommand
 
     public function getDynamicData($column): string
     {
-        $name = str_replace('-', ' ', Str::slug($column));
-        return '<td class="px-6 py-4 whitespace-nowrap">{{ $row->' . $name . '}}</td>';
+        return '<td class="px-6 py-4 whitespace-nowrap">{{ $row->' . $column . '}}</td>';
     }
 
     public function getHeadings(): string

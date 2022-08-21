@@ -37,9 +37,6 @@ class {{ name }} extends Component
     public function render()
     {
         {{ query }}
-        return view('livewire.{{ blade }}', [
-            'rows'=> $model
-        ]);
     }
 
     public function create ()
@@ -49,13 +46,11 @@ class {{ name }} extends Component
         $this->showForm = true;
     }
 
-
     public function edit($primaryId)
     {
         $this->mode = 'update';
         $this->primaryId = $primaryId;
-        $model = Model::find($primaryId);
-
+        
         {{ setedibleval }}
 
         $this->showForm = true;
@@ -70,9 +65,7 @@ class {{ name }} extends Component
     {
         $this->validate();
 
-        $model = new Model();
-
-        {{ codeTosave }}
+        {{ codeTostore }}
 
         $this->resetForm();
         session()->flash('message', 'Record Saved Successfully');
@@ -88,9 +81,7 @@ class {{ name }} extends Component
     {
         $this->validate();
 
-        $model = Model::find($this->primaryId);
-
-        {{ codeTosave }}
+        {{ codeToupdate }}
 
         $this->resetForm();
         
@@ -107,7 +98,7 @@ class {{ name }} extends Component
 
     public function destroy()
     {
-        Model::find($this->primaryId)->delete();
+        {{ name }}::find($this->primaryId)->delete();
         $this->showConfirmDeletePopup = false;
         session()->flash('message', 'Record Deleted Successfully');
     }

@@ -46,7 +46,8 @@ class Crud extends GeneratorCommand
             '{{ properties }}' => $this->buildProperties(),
             '{{ useclasses }}' => $this->usedClasses(),
             '{{ setedibleval }}' => $this->setEditableValues(),
-            '{{ codeTosave }}' => $this->getSaveCode(),
+            '{{ codeTostore }}' => $this->getStoreCode(),
+            '{{ codeToupdate }}' => $this->getUpdateCode(),
             '{{ rules }}' => $this->getRules(),
             '{{ query }}' => $this->search(),
             '{{ reset }}' => $this->resetForms()
@@ -86,22 +87,37 @@ class Crud extends GeneratorCommand
 
     public function search()
     {
-        $class = 'App\\Models\\' . $this->arguments()['name'];
+        $name = $this->arguments()['name'];
+        $class = 'App\\Models\\' . $name;
         $model = new $class;
+        $singular_lower = $name->lower();
+        $plural_lower = $name->plural()->lower();
         $columns = $model->getFillable();
-        $str = '$model = Model::';
-        $i = 0;
+        $columnCount = count($columns);
+        $str = '$' . Str::of($this->arguments()['name'])->plural()->lower() . ' = ' . $this->arguments()['name'] . '::';
+        $i = 1;
+        $padding2 = '        ';
+        $padding3 = '            ';
         foreach ($columns as $column) {
             if ($column != 'created_at' || $column != 'updated_at' || $column!='password') {
-                if (!$i) {
-                    $str .= "where('". $column . "', 'like', '%'.$this->search.'%')";
+                if ($i == 1) {
+                    if ($i == $columnCount) {
+                        $str .= "where('". $column . "', 'like', '%'.$this->search.'%')";
+                    } else {
+                        $str .= "where('". $column . "', 'like', '%'.$this->search.'%')". PHP_EOL;
+                    }
                 } else {
-                    $str .= "->orWhere('" . $column . "', 'like', '%'.$this->search.'%')";
+                    if ($i == $columnCount) {
+                        $str .= $padding3 . "->orWhere('" . $column . "', 'like', '%'.$this->search.'%')";
+                    } else {
+                        $str .= $padding3 . "->orWhere('" . $column . "', 'like', '%'.$this->search.'%')" . PHP_EOL;
+                    }
                 }
             }
             $i++;
         }
-        $str .= '->latest()->paginate($this->paginate);';
+        $str .= $padding3 . '->latest()->paginate($this->paginate);' . PHP_EOL;
+        $str .= $padding2 . "return view('livewire.$singular_lower', ['$plural_lower'=> $$plural_lower]);";
         return $str;
     }
 
@@ -160,49 +176,77 @@ class Crud extends GeneratorCommand
 
     public function setEditableValues()
     {
-        $class = 'App\\Models\\' . $this->arguments()['name'];
+        $name = $this->arguments()['name'];
+        $class = 'App\\Models\\' . $name;
         $model = new $class;
         $columns = $model->getFillable();
         $columnCount = count($columns);
-        $str = '';
+        $lower = $name->lower();
+        $str = "$$lower = $name::find($primaryId);";
         $padding = '        ';
         $c = 1;
         foreach ($columns as $column) {
             if ($column != 'created_at' || $column != 'updated_at') {
                 if ($c == $columnCount) {
                     if ($c == 1) {
-                        $str .= '$this->' . str_replace('-', '_', Str::slug($column)) . '= $model->' . $column . ';';
+                        $str .= '$this->' . str_replace('-', '_', Str::slug($column)) . '= $' . $lower . '->' . $column . ';';
                     } else {
-                        $str .= $padding . '$this->' . str_replace('-', '_', Str::slug($column)) . '= $model->' . $column . ';';
+                        $str .= $padding . '$this->' . str_replace('-', '_', Str::slug($column)) . '= $' . $lower . '->' . $column . ';';
                     }
                 } else {
                     if ($c == 1) {
-                        $str .= '$this->' . str_replace('-', '_', Str::slug($column)) . '= $model->' . $column . ';' . PHP_EOL;
+                        $str .= '$this->' . str_replace('-', '_', Str::slug($column)) . '= $' . $lower . '->' . $column . ';' . PHP_EOL;
                     } else {
-                        $str .= $padding. '$this->' . str_replace('-', '_', Str::slug($column)) . '= $model->' . $column . ';' . PHP_EOL;
+                        $str .= $padding. '$this->' . str_replace('-', '_', Str::slug($column)) . '= $' . $lower . '->' . $column . ';' . PHP_EOL;
                     }
                 }
             }
             $c++;
         }
-
         return $str;
     }
 
-    public function getSaveCode()
+    public function getStoreCode()
     {
-        $class = 'App\\Models\\' . $this->arguments()['name'];
+        $name = $this->arguments()['name'];
+        $class = 'App\\Models\\' . $name;
+        $lower = $name->lower();
         $model = new $class;
         $columns = $model->getFillable();
-        $str = '';
+        $str = '$' . $lower. ' = new ' . $name . '();';
         $padding = '        ';
         $c = 1;
         foreach ($columns as $column) {
             if ($column != 'created_at' || $column != 'updated_at') {
                 if ($c > 1) {
-                    $str .= $padding . '$model->' . str_replace('-', '_', Str::slug($column)) . '= $this->' . str_replace('-', '_', Str::slug($column)) . ';' . PHP_EOL;
+                    $str .= $padding . '$' . $lower . '->' . str_replace('-', '_', Str::slug($column)) . '= $this->' . str_replace('-', '_', Str::slug($column)) . ';' . PHP_EOL;
                 } else {
-                    $str .= '$model->' . str_replace('-', '_', Str::slug($column)) . '= $this->' . str_replace('-', '_', Str::slug($column)) . ';' . PHP_EOL;
+                    $str .= '$' . $lower . '->' . str_replace('-', '_', Str::slug($column)) . '= $this->' . str_replace('-', '_', Str::slug($column)) . ';' . PHP_EOL;
+                }
+            }
+            $c++;
+        }
+        $str .= $padding . '$model->save();';
+
+        return $str;
+    }
+
+    public function getUpdateCode()
+    {
+        $name = $this->arguments()['name'];
+        $class = 'App\\Models\\' . $name;
+        $lower = $name->lower();
+        $model = new $class;
+        $columns = $model->getFillable();
+        $str = '$' . $lower. ' = ' . $name . '::find($this->primaryId);';
+        $padding = '        ';
+        $c = 1;
+        foreach ($columns as $column) {
+            if ($column != 'created_at' || $column != 'updated_at') {
+                if ($c > 1) {
+                    $str .= $padding . '$' . $lower . '->' . str_replace('-', '_', Str::slug($column)) . '= $this->' . str_replace('-', '_', Str::slug($column)) . ';' . PHP_EOL;
+                } else {
+                    $str .= '$' . $lower . '->' . str_replace('-', '_', Str::slug($column)) . '= $this->' . str_replace('-', '_', Str::slug($column)) . ';' . PHP_EOL;
                 }
             }
             $c++;
@@ -214,7 +258,7 @@ class Crud extends GeneratorCommand
 
     protected function usedClasses()
     {
-        return 'use Livewire\Component;' . PHP_EOL . 'use Livewire\WithPagination;' . PHP_EOL . 'use App\\Models\\' . $this->arguments()['name'] . ' as Model;' . PHP_EOL;
+        return 'use Livewire\Component;' . PHP_EOL . 'use Livewire\WithPagination;' . PHP_EOL . 'use App\\Models\\' . $this->arguments()['name'] . ';';
     }
 
     /**
