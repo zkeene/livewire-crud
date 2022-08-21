@@ -68,15 +68,15 @@ class Crud extends GeneratorCommand
             if ($column != 'created_at' || $column != 'updated_at') {
                 if ($c == 1) {
                     if ($c == $columnCount) {
-                        $str .= '$this->'.str_replace('-', '_', Str::slug($column)) . '= "";';
+                        $str .= '$this->'.str_replace('-', '_', Str::slug($column)) . ' = "";';
                     } else {
-                        $str .= '$this->'.str_replace('-', '_', Str::slug($column)) . '= "";' . PHP_EOL;
+                        $str .= '$this->'.str_replace('-', '_', Str::slug($column)) . ' = "";' . PHP_EOL;
                     }
                 } else {
                     if ($c == $columnCount) {
-                        $str .= $padding . '$this->'.str_replace('-', '_', Str::slug($column)) . '= "";';
+                        $str .= $padding . '$this->'.str_replace('-', '_', Str::slug($column)) . ' = "";';
                     } else {
-                        $str .= $padding . '$this->'.str_replace('-', '_', Str::slug($column)) . '= "";' . PHP_EOL;
+                        $str .= $padding . '$this->'.str_replace('-', '_', Str::slug($column)) . ' = "";' . PHP_EOL;
                     }
                 }
             }
@@ -217,7 +217,7 @@ class Crud extends GeneratorCommand
         $lower = Str::of($name)->lower();
         $model = new $class;
         $columns = $model->getFillable();
-        $str = '$' . $lower. ' = ' . $name . '::find($this->primaryId);' . PHP_EOL;
+        $str = '$' . $lower. ' = ' . $name . '::find($this->primaryId);' . PHP_EOL . PHP_EOL;
         $padding = '        ';
         $c = 1;
         foreach ($columns as $column) {

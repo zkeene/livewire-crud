@@ -35,6 +35,8 @@ class LiveCrudView extends GeneratorCommand
     {
         $array = [
             '{{ title }}' => ucfirst($this->arguments()['name']),
+            '{{ nameLower }}' => Str::on($this->arguments()['name'])->lower(),
+            '{{ nameLowerPlural }}' =>Str::on($this->arguments()['name']->lower()->plural()),
             '{{ headings }}' => $this->getHeadings(),
             '{{ renderedData }}' => $this->getRenderedData(),
             '{{ form }}' => $this->getForm()
@@ -136,7 +138,8 @@ class LiveCrudView extends GeneratorCommand
 
     public function getDynamicData($column): string
     {
-        return '<td class="px-6 py-4 whitespace-nowrap">{{ $row->' . $column . '}}</td>';
+        $modelName = Str::on($this->arguments()['name'])->lower();
+        return '<td class="px-6 py-4 whitespace-nowrap">{{ $'. $modelName . '->' . $column . '}}</td>';
     }
 
     public function getHeadings(): string
