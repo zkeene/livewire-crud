@@ -51,7 +51,7 @@ class LiveCrudView extends GeneratorCommand
         $columns = $model->getFillable();
         $columnCount = count($columns);
         $str = '';
-        $padding = '        ';
+        $padding = '                                        ';
         $c = 1;
         foreach ($columns as $column) {
             if ($column != 'created_at' || $column != 'updated_at') {
@@ -105,15 +105,15 @@ class LiveCrudView extends GeneratorCommand
             if ($column != 'created_at' || $column != 'updated_at') {
                 if ($c == 1) {
                     if ($c == $columnCount) {
-                        $str .= $this->getDynamicData(str_replace('-', ' ', Str::slug($column)));
+                        $str .= $this->getDynamicData($column);
                     } else {
-                        $str .= $this->getDynamicData(str_replace('-', ' ', Str::slug($column))) . PHP_EOL;
+                        $str .= $this->getDynamicData($column) . PHP_EOL;
                     }
                 } else {
                     if ($c == $columnCount) {
-                        $str .= $this->getDynamicData(str_replace('-', ' ', Str::slug($column)));
+                        $str .= $this->getDynamicData($column);
                     } else {
-                        $str .= $this->getDynamicData(str_replace('-', ' ', Str::slug($column))) . PHP_EOL;
+                        $str .= $this->getDynamicData($column) . PHP_EOL;
                     }
                 }
             }
@@ -122,9 +122,10 @@ class LiveCrudView extends GeneratorCommand
         return $str;
     }
 
-    public function getDynamicData($name): string
+    public function getDynamicData($column): string
     {
-        return ' <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{{ $row->' . $name . '}}</td>' . PHP_EOL;
+        $name = str_replace('-', ' ', Str::slug($column));
+        return '<td class="px-6 py-4 whitespace-nowrap">{{ $row->' . $name . '}}</td>';
     }
 
     public function getHeadings(): string

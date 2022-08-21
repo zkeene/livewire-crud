@@ -43,11 +43,11 @@
                             </th>
                         </tr>
                         </thead>
-                        <tbody class="bg-white divide-y divide-gray-200">
+                        <tbody class="bg-white divide-y divide-gray-200 text-sm text-gray-500">
                             @forelse($rows as $row)
                                 <tr>
                                     {{ renderedData }}
-                                    <td class="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
+                                    <td class="px-6 py-4 whitespace-nowrap text-right font-medium">
                                         <a href="#" class="text-indigo-600 hover:text-indigo-900" wire:click="edit({{ $row->id }})">{{ __("Edit") }}</a>
                                         <a href="#" class="text-indigo-600 hover:text-indigo-900" wire:click="confirmDelete({{ $row->id }})">{{ __("Delete") }}</a>
                                     </td>
@@ -64,8 +64,6 @@
             </div>
         </div>
     </div>
-
-
 
     {{--    create / edit form --}}
     @if($showForm)
@@ -114,7 +112,6 @@
             </div>
     @endif
 {{--    /create /edit form--}}
-
 
 {{--    delete popup--}}
     @if($showConfirmDeletePopup)
