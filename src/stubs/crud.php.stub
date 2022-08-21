@@ -4,7 +4,7 @@ namespace {{ namespace }};
 
 {{ useclasses }}
 
-class {{ name }} extends Component
+class {{ name }}LiveComp extends Component
 {
     use WithPagination;
 

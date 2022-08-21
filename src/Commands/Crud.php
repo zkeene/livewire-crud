@@ -101,17 +101,9 @@ class Crud extends GeneratorCommand
         foreach ($columns as $column) {
             if ($column != 'created_at' || $column != 'updated_at' || $column!='password') {
                 if ($i == 1) {
-                    if ($i == $columnCount) {
-                        $str .= "where('". $column . "', 'like', '%'.$this->search.'%')";
-                    } else {
-                        $str .= "where('". $column . "', 'like', '%'.$this->search.'%')". PHP_EOL;
-                    }
+                    $str .= "where('". $column . "', 'like', '%'.$this->search.'%')". PHP_EOL;
                 } else {
-                    if ($i == $columnCount) {
-                        $str .= $padding3 . "->orWhere('" . $column . "', 'like', '%'.$this->search.'%')";
-                    } else {
                         $str .= $padding3 . "->orWhere('" . $column . "', 'like', '%'.$this->search.'%')" . PHP_EOL;
-                    }
                 }
             }
             $i++;
@@ -182,23 +174,15 @@ class Crud extends GeneratorCommand
         $columns = $model->getFillable();
         $columnCount = count($columns);
         $lower = Str::of($name)->lower();
-        $str = '$' . $lower . ' = ' . $name . '::find($primaryId);';
+        $str = '$' . $lower . ' = ' . $name . '::find($primaryId);' . PHP_EOL . PHP_EOL;
         $padding = '        ';
         $c = 1;
         foreach ($columns as $column) {
             if ($column != 'created_at' || $column != 'updated_at') {
                 if ($c == $columnCount) {
-                    if ($c == 1) {
-                        $str .= '$this->' . str_replace('-', '_', Str::slug($column)) . '= $' . $lower . '->' . $column . ';';
-                    } else {
-                        $str .= $padding . '$this->' . str_replace('-', '_', Str::slug($column)) . '= $' . $lower . '->' . $column . ';';
-                    }
+                        $str .= $padding . '$this->' . str_replace('-', '_', Str::slug($column)) . ' = $' . $lower . '->' . $column . ';';
                 } else {
-                    if ($c == 1) {
-                        $str .= '$this->' . str_replace('-', '_', Str::slug($column)) . '= $' . $lower . '->' . $column . ';' . PHP_EOL;
-                    } else {
-                        $str .= $padding. '$this->' . str_replace('-', '_', Str::slug($column)) . '= $' . $lower . '->' . $column . ';' . PHP_EOL;
-                    }
+                        $str .= $padding. '$this->' . str_replace('-', '_', Str::slug($column)) . ' = $' . $lower . '->' . $column . ';' . PHP_EOL;
                 }
             }
             $c++;
@@ -213,21 +197,16 @@ class Crud extends GeneratorCommand
         $lower = Str::of($name)->lower();
         $model = new $class;
         $columns = $model->getFillable();
-        $str = '$' . $lower. ' = new ' . $name . '();';
+        $str = '$' . $lower. ' = new ' . $name . '();' . PHP_EOL . PHP_EOL;
         $padding = '        ';
         $c = 1;
         foreach ($columns as $column) {
             if ($column != 'created_at' || $column != 'updated_at') {
-                if ($c > 1) {
-                    $str .= $padding . '$' . $lower . '->' . str_replace('-', '_', Str::slug($column)) . '= $this->' . str_replace('-', '_', Str::slug($column)) . ';' . PHP_EOL;
-                } else {
-                    $str .= '$' . $lower . '->' . str_replace('-', '_', Str::slug($column)) . '= $this->' . str_replace('-', '_', Str::slug($column)) . ';' . PHP_EOL;
-                }
+                $str .= $padding . '$' . $lower . '->' . str_replace('-', '_', Str::slug($column)) . '= $this->' . str_replace('-', '_', Str::slug($column)) . ';' . PHP_EOL;
             }
             $c++;
         }
-        $str .= $padding . '$model->save();';
-
+        $str .= PHP_EOL . $padding . '$' . $lower . '->save();';
         return $str;
     }
 
@@ -238,20 +217,16 @@ class Crud extends GeneratorCommand
         $lower = Str::of($name)->lower();
         $model = new $class;
         $columns = $model->getFillable();
-        $str = '$' . $lower. ' = ' . $name . '::find($this->primaryId);';
+        $str = '$' . $lower. ' = ' . $name . '::find($this->primaryId);' . PHP_EOL;
         $padding = '        ';
         $c = 1;
         foreach ($columns as $column) {
             if ($column != 'created_at' || $column != 'updated_at') {
-                if ($c > 1) {
-                    $str .= $padding . '$' . $lower . '->' . str_replace('-', '_', Str::slug($column)) . '= $this->' . str_replace('-', '_', Str::slug($column)) . ';' . PHP_EOL;
-                } else {
-                    $str .= '$' . $lower . '->' . str_replace('-', '_', Str::slug($column)) . '= $this->' . str_replace('-', '_', Str::slug($column)) . ';' . PHP_EOL;
-                }
+                $str .= $padding . '$' . $lower . '->' . str_replace('-', '_', Str::slug($column)) . '= $this->' . str_replace('-', '_', Str::slug($column)) . ';' . PHP_EOL;
             }
             $c++;
         }
-        $str .= $padding . '$model->save();';
+        $str .= PHP_EOL . $padding . '$' . $lower . '->save();';
 
         return $str;
     }
