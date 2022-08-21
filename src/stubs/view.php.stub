@@ -58,7 +58,7 @@
                         </tbody>
                     </table>
                     <div class="p-2">
-                        {{ $rows->links() }}
+                        {{ ${{ nameLowerPlural }}->links() }}
                     </div>
                 </div>
             </div>

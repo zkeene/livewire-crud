@@ -21,9 +21,9 @@ class Crud extends GeneratorCommand
 
         // Get the fully qualified class name (FQN)
         $class = $this->qualifyClass($this->getNameInput());
-
+        $filename = $class . 'LiveComponent';
         // get the destination path, based on the default namespace
-        $path = $this->getPath($class);
+        $path = $this->getPath($filename);
         $content = file_get_contents($path);
         // Update the file content with additional data (regular expressions)
         $this->info('Generating Livewire Component');

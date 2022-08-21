@@ -36,7 +36,7 @@ class LiveCrudView extends GeneratorCommand
         $array = [
             '{{ title }}' => ucfirst($this->arguments()['name']),
             '{{ nameLower }}' => Str::of($this->arguments()['name'])->lower(),
-            '{{ nameLowerPlural }}' =>Str::of($this->arguments()['name']->lower()->plural()),
+            '{{ nameLowerPlural }}' =>Str::of($this->arguments()['name'])->lower()->plural(),
             '{{ headings }}' => $this->getHeadings(),
             '{{ renderedData }}' => $this->getRenderedData(),
             '{{ form }}' => $this->getForm()
