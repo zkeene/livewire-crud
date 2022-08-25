@@ -11,12 +11,11 @@ use Illuminate\Support\Str;
 class Crud extends GeneratorCommand
 {
     protected $signature = 'crud:make {name}';
-
     protected $description = 'Generate Crud Livewire';
     protected $search = '$this->search';
+
     public function handle()
     {
-        parent::handle();
 
         if (!is_dir(app_path('http/livewire'))) {
             mkdir(app_path('http/livewire'));
@@ -24,7 +23,6 @@ class Crud extends GeneratorCommand
         $componentPath = app_path('http/livewire/') . $this->arguments()['name'] . 'LiveComponent.php';
         $content = file_get_contents($this->getStub());
 
-        // Update the file content with additional data (regular expressions)
         $this->info('Generating Livewire Component');
 
         $content = $this->buildContent($content);
@@ -97,18 +95,35 @@ class Crud extends GeneratorCommand
         $i = 1;
         $padding2 = '        ';
         $padding3 = '            ';
+        $foreignKeys = [];
         foreach ($columns as $column) {
-            if ($column != 'created_at' || $column != 'updated_at' || $column!='password') {
-                if ($i == 1) {
-                    $str .= "where('". $column . "', 'like', '%'.$this->search.'%')". PHP_EOL;
-                } else {
-                        $str .= $padding3 . "->orWhere('" . $column . "', 'like', '%'.$this->search.'%')" . PHP_EOL;
+            if ($column != 'created_at' || 
+                $column != 'updated_at' || 
+                $column != 'password' ||
+                $column != 'id' ||
+                substr($column,-3) != '_id') {
+                if ($i != 1) {
+                    $str .= $padding3;
                 }
+                $str .= "->orWhere('" . $column . "', 'like', '%'.$this->search.'%')" . PHP_EOL;
+            }
+            if(substr($column,-3) == '_id'){
+                $foreignKeys[] = substr($column,0,-3);
             }
             $i++;
         }
         $str .= $padding3 . '->latest()->paginate($this->paginate);' . PHP_EOL;
-        $str .= $padding2 . "return view('livewire.$singular_lower', ['$plural_lower'=> $$plural_lower]);";
+
+        foreach($foreignKeys as $foreignKey){
+            $str .= '$' . Str::of($foreignKey)->plural()->lower() . ' = ' . ucfirst($foreignKey) . '::all();'. PHP_EOL;
+        }
+
+        $str .= $padding2 . "return view('livewire.$singular_lower', ['$plural_lower'=> $$plural_lower";
+        foreach($foreignKeys as $foreignKey){
+            $key = Str::of($foreignKey)->plural()->lower();
+            $str .= ', ' . $key . ' => $' . $key;
+        }
+        $str .= ']);';
         return $str;
     }
 
@@ -232,7 +247,16 @@ class Crud extends GeneratorCommand
 
     protected function usedClasses()
     {
-        return 'use Livewire\Component;' . PHP_EOL . 'use Livewire\WithPagination;' . PHP_EOL . 'use App\\Models\\' . $this->arguments()['name'] . ';';
+        $class = 'App\\Models\\' . $this->arguments()['name'];
+        $model = new $class;
+        $columns = $model->getFillable();
+        $str = 'use ' . $class . ';'. PHP_EOL;
+        foreach ($columns as $column) {
+            if(substr($column, -3) == '_id') {
+                $str .= 'use App\\Models\\' . ucfirst(substr($column, 0, -3)) . ';';
+            }
+        }
+        return $str;
     }
 
     /**

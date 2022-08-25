@@ -56,18 +56,18 @@ class LiveCrudView extends GeneratorCommand
         $c = 1;
         foreach ($columns as $column) {
             if ($column != 'created_at' || $column != 'updated_at') {
-                if ($c == 1) {
-                    if($c == $columnCount) {
-                        $str .= $this->makeInput($column);
-                    } else {
-                        $str .= $this->makeInput($column) . PHP_EOL;
-                    }
+                if ($c != 1) {
+                    $str .= $padding;
+                }
+
+                if ($this->getType($column) == 'foreignid') {
+                    $str .= $this->makeSelect($column);
                 } else {
-                    if($c == $columnCount) {
-                        $str .= $padding . $this->makeInput($column);
-                    } else {
-                        $str .= $padding . $this->makeInput($column) . PHP_EOL;
-                    }
+                    $str .= $this->makeInput($column);
+                }
+
+                if ($c != $columnCount) {
+                    $str .= PHP_EOL;
                 }
             }
             $c++;
@@ -81,14 +81,30 @@ class LiveCrudView extends GeneratorCommand
         $label = ucfirst(str_replace('-', ' ', Str::slug($name)));
         $message = '{{ $message }}';
         $output = "<div><label class='block'><span class='text-gray-700 @error('{$name}') text-red-500  @enderror'>{$label}</span>";
-        if ($type == 'foreignid'){
-            $output .= "<select class='mt-1 block w-full rounded-md border-gray-300 shadow-sm @error('{$name}') border-red-500 @enderror focus:border-indigo-300 focus:ring focus:ring-indigo-200 focus:ring-opacity-50' wire:model='{$name}'>";
-            $output .= "";
-            $output .= "</select>";
-        } else {
-            $output .= "<input type='{$type}' class='mt-1 block w-full rounded-md border-gray-300 shadow-sm @error('{$name}') border-red-500 @enderror focus:border-indigo-300 focus:ring focus:ring-indigo-200 focus:ring-opacity-50' wire:model='{$name}'>";
-        }
+        $output .= "<input type='{$type}' class='mt-1 block w-full rounded-md border-gray-300 shadow-sm @error('{$name}') border-red-500 @enderror focus:border-indigo-300 focus:ring focus:ring-indigo-200 focus:ring-opacity-50' wire:model='{$name}'>";
         $output .= "@error('{$name}')<span class='text-red-500 text-sm'>{$message}</span>@enderror</label></div>";
+        return $output;
+    }
+
+    public function makeSelect($name)
+    {
+        $label = ucfirst(str_replace('-', ' ', Str::slug(substr($name, 0, -3))));
+        $pluralLower = Str::of($label)->plural()->lower();
+        $singularLower = Str::of($label)->singular()->lower();
+        $message = '{{ $message }}';
+
+        $class = 'App\\Models\\' . $label;
+        $model = new $class;
+        $displayField = $model->displayField;
+
+        $output = "<div><label class='block'><span class='text-gray-700 @error('{$name}') text-red-500  @enderror'>{$label}</span>";
+        $output .= "<select class='mt-1 block w-full rounded-md border-gray-300 shadow-sm @error('{$name}') border-red-500 @enderror focus:border-indigo-300 focus:ring focus:ring-indigo-200 focus:ring-opacity-50' wire:model='{$name}'>" . PHP_EOL;
+        $output .= '@foreach($' . $pluralLower . ' as $' . $singularLower . ')' . PHP_EOL;
+        $output .= '<option value="{{ $' . $singularLower . '->id }}" wire:key="' . $singularLower . '-{{ $' . $singularLower . '->id }}">{{ $' . $singularLower . '->name }}</option>'. PHP_EOL;
+        $output .= "@endforeach" . PHP_EOL;
+        $output .= "</select>" . PHP_EOL;
+        $output .= "@error('{$name}')<span class='text-red-500 text-sm'>{$message}</span>@enderror</label></div>";
+
         return $output;
     }
 
@@ -139,7 +155,15 @@ class LiveCrudView extends GeneratorCommand
     public function getDynamicData($column): string
     {
         $modelName = Str::of($this->arguments()['name'])->lower();
-        return '<td class="px-6 py-4 whitespace-nowrap">{{ $'. $modelName . '->' . $column . ' }}</td>';
+
+        if ($this->getType($column) == 'foreignid') {
+            $class = 'App\\Models\\' . ucfirst(substr($column, 0, -3));
+            $model = new $class;
+            $displayField = $model->displayField;
+            return '<td class="px-6 py-4 whitespace-nowrap">{{ $'. $modelName . '->' . substr($column, 0, -3) . '->' . $displayField . '}}</td>';
+        } else {
+            return '<td class="px-6 py-4 whitespace-nowrap">{{ $'. $modelName . '->' . $column . ' }}</td>';
+        }
     }
 
     public function getHeadings(): string
@@ -153,18 +177,16 @@ class LiveCrudView extends GeneratorCommand
         $padding = '                            ';
         foreach ($columns as $column) {
             if ($column != 'created_at' || $column != 'updated_at') {
-                if ($c==1) {
-                    if ($c == $columnCount) {
-                        $str .= $this->getInput(str_replace('-', ' ', Str::slug($column)));
-                    } else {
-                        $str .= $this->getInput(str_replace('-', ' ', Str::slug($column))) . PHP_EOL;
-                    }
-                } else {
-                    if ($c == $columnCount) {
-                        $str .= $padding . $this->getInput(str_replace('-', ' ', Str::slug($column)));
-                    } else {
-                        $str .= $padding . $this->getInput(str_replace('-', ' ', Str::slug($column))) . PHP_EOL;
-                    }
+                if ($this->getType($column) == 'foreignid') {
+                    $column = substr($column, 0, -3);
+                }
+                $heading = str_replace('-', ' ', Str::slug($column));
+                if ($c!=1) {
+                    $str .= $padding;
+                }
+                $str .= $this->getInput($heading);
+                if ($c != $columnCount) {
+                    $str .= PHP_EOL;
                 }
             }
             $c++;
