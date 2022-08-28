@@ -13,6 +13,11 @@ class Crud extends GeneratorCommand
     protected $signature = 'crud:make {name}';
     protected $description = 'Generate Crud Livewire';
     protected $search = '$this->search';
+    
+    public function tabs($i)
+    {
+        return str_repeat('    ', $i);
+    }
 
     public function handle()
     {
@@ -47,7 +52,8 @@ class Crud extends GeneratorCommand
             '{{ codeToupdate }}' => $this->getUpdateCode(),
             '{{ rules }}' => $this->getRules(),
             '{{ query }}' => $this->search(),
-            '{{ reset }}' => $this->resetForms()
+            '{{ reset }}' => $this->resetForms(),
+            '{{ viewCode }}' => $this->getViewCode()
         ];
         return str_replace(array_keys($array), array_values($array), $content);
     }
@@ -59,22 +65,15 @@ class Crud extends GeneratorCommand
         $columns = $model->getFillable();
         $str = '';
         $columnCount = count($columns);
-        $padding = '        ';
         $c = 1;
         foreach ($columns as $column) {
             if ($column != 'created_at' || $column != 'updated_at') {
-                if ($c == 1) {
-                    if ($c == $columnCount) {
-                        $str .= '$this->'.str_replace('-', '_', Str::slug($column)) . ' = "";';
-                    } else {
-                        $str .= '$this->'.str_replace('-', '_', Str::slug($column)) . ' = "";' . PHP_EOL;
-                    }
-                } else {
-                    if ($c == $columnCount) {
-                        $str .= $padding . '$this->'.str_replace('-', '_', Str::slug($column)) . ' = "";';
-                    } else {
-                        $str .= $padding . '$this->'.str_replace('-', '_', Str::slug($column)) . ' = "";' . PHP_EOL;
-                    }
+                if ($c != 1) {
+                    $str .= $this->tabs(2);
+                }
+                $str .= '$this->'.str_replace('-', '_', Str::slug($column)) . ' = "";';
+                if ($c != $columnCount) {
+                    $str .= PHP_EOL;
                 }
             }
             $c++;
@@ -93,8 +92,6 @@ class Crud extends GeneratorCommand
         $columnCount = count($columns);
         $str = '$' . $plural_lower . ' = ' . $name . '::';
         $i = 1;
-        $padding2 = '        ';
-        $padding3 = '            ';
         $foreignKeys = [];
         foreach ($columns as $column) {
             if ($column != 'created_at' || 
@@ -102,26 +99,27 @@ class Crud extends GeneratorCommand
                 $column != 'password' ||
                 $column != 'id' ||
                 substr($column,-3) != '_id') {
-                if ($i != 1) {
-                    $str .= $padding3;
+                if ($i == 1) {
+                    $str .= "where('" . $column . "', 'like', '%'.$this->search.'%')" . PHP_EOL;
+                } else {
+                    $str .= $this->tabs(3) . "->orWhere('" . $column . "', 'like', '%'.$this->search.'%')" . PHP_EOL;
                 }
-                $str .= "->orWhere('" . $column . "', 'like', '%'.$this->search.'%')" . PHP_EOL;
             }
             if(substr($column,-3) == '_id'){
                 $foreignKeys[] = substr($column,0,-3);
             }
             $i++;
         }
-        $str .= $padding3 . '->latest()->paginate($this->paginate);' . PHP_EOL;
+        $str .= $this->tabs(3) . '->latest()->paginate($this->paginate);' . PHP_EOL;
 
         foreach($foreignKeys as $foreignKey){
-            $str .= '$' . Str::of($foreignKey)->plural()->lower() . ' = ' . ucfirst($foreignKey) . '::all();'. PHP_EOL;
+            $str .= $this->tabs(2) . '$' . Str::of($foreignKey)->plural()->lower() . ' = ' . ucfirst($foreignKey) . '::all();'. PHP_EOL;
         }
 
-        $str .= $padding2 . "return view('livewire.$singular_lower', ['$plural_lower'=> $$plural_lower";
+        $str .= $this->tabs(2) . "return view('livewire.$singular_lower', ['$plural_lower' => $$plural_lower";
         foreach($foreignKeys as $foreignKey){
             $key = Str::of($foreignKey)->plural()->lower();
-            $str .= ', ' . $key . ' => $' . $key;
+            $str .= ', \'' . $key . '\' => $' . $key;
         }
         $str .= ']);';
         return $str;
@@ -161,18 +159,15 @@ class Crud extends GeneratorCommand
         $c = 1;
         foreach ($columns as $column) {
             if ($column != 'created_at' || $column != 'updated_at') {
-                if ($c == 1) {
-                    if($c == $columnCount) {
-                        $str .= 'public $' . str_replace('-', '_', Str::slug($column)) . ';';
-                    } else {
-                        $str .= 'public $' . str_replace('-', '_', Str::slug($column)) . ';' . PHP_EOL;
-                    }
-                } else {
-                    if($c == $columnCount) {
-                        $str .= '    public $' . str_replace('-', '_', Str::slug($column)) . ';';
-                    } else {
-                        $str .= '    public $' . str_replace('-', '_', Str::slug($column)) . ';' . PHP_EOL;
-                    }
+                if ($c != 1) {
+                    $str .= $this->tabs(1);
+                }
+                if (substr($column,-3) == '_id') {
+                    $str .= 'public $' . str_replace('-', '_', Str::slug(substr($column, 0, -3))) . ';' . PHP_EOL . $this->tabs(1);
+                }
+                $str .= 'public $' . str_replace('-', '_', Str::slug($column)) . ';';
+                if($c != $columnCount) {
+                    $str .= PHP_EOL;
                 }
             }
             $c++;
@@ -189,14 +184,43 @@ class Crud extends GeneratorCommand
         $columnCount = count($columns);
         $lower = Str::of($name)->lower();
         $str = '$' . $lower . ' = ' . $name . '::find($primaryId);' . PHP_EOL . PHP_EOL;
-        $padding = '        ';
         $c = 1;
         foreach ($columns as $column) {
             if ($column != 'created_at' || $column != 'updated_at') {
-                if ($c == $columnCount) {
-                        $str .= $padding . '$this->' . str_replace('-', '_', Str::slug($column)) . ' = $' . $lower . '->' . $column . ';';
+                $str .= $this->tabs(2) . '$this->' . str_replace('-', '_', Str::slug($column)) . ' = $' . $lower . '->' . $column . ';';
+                if ($c != $columnCount) {
+                    $str .= PHP_EOL;
+                }
+            }
+            $c++;
+        }
+        return $str;
+    }
+
+    public function getViewCode()
+    {
+        $name = $this->arguments()['name'];
+        $class = 'App\\Models\\' . $name;
+        $model = new $class;
+        $columns = $model->getFillable();
+        $columnCount = count($columns);
+        $lower = Str::of($name)->lower();
+        $str = '$' . $lower . ' = ' . $name . '::find($primaryId);' . PHP_EOL . PHP_EOL;
+        $c = 1;
+        foreach ($columns as $column) {
+            if ($column != 'created_at' || $column != 'updated_at') {
+                if(substr($column, -3) == '_id') {
+                    $column = substr($column, 0, -3);
+                    $classCol = 'App\\Models\\' . ucfirst($column);
+                    $modelCol = new $classCol;
+                    $displayField = $modelCol->displayField;
+                    $str .= $this->tabs(2) . '$this->' . str_replace('-', '_', Str::slug($column)) . ' = $' . $lower . '->' . $column . '->' . $displayField . ';';
                 } else {
-                        $str .= $padding. '$this->' . str_replace('-', '_', Str::slug($column)) . ' = $' . $lower . '->' . $column . ';' . PHP_EOL;
+                    $str .= $this->tabs(2) . '$this->' . str_replace('-', '_', Str::slug($column)) . ' = $' . $lower . '->' . $column . ';';
+                }
+                
+                if ($c != $columnCount) {
+                      $str .= PHP_EOL;  
                 }
             }
             $c++;
@@ -212,15 +236,14 @@ class Crud extends GeneratorCommand
         $model = new $class;
         $columns = $model->getFillable();
         $str = '$' . $lower. ' = new ' . $name . '();' . PHP_EOL . PHP_EOL;
-        $padding = '        ';
         $c = 1;
         foreach ($columns as $column) {
             if ($column != 'created_at' || $column != 'updated_at') {
-                $str .= $padding . '$' . $lower . '->' . str_replace('-', '_', Str::slug($column)) . '= $this->' . str_replace('-', '_', Str::slug($column)) . ';' . PHP_EOL;
+                $str .= $this->tabs(2) . '$' . $lower . '->' . str_replace('-', '_', Str::slug($column)) . '= $this->' . str_replace('-', '_', Str::slug($column)) . ';' . PHP_EOL;
             }
             $c++;
         }
-        $str .= PHP_EOL . $padding . '$' . $lower . '->save();';
+        $str .= PHP_EOL . $this->tabs(2) . '$' . $lower . '->save();';
         return $str;
     }
 
@@ -232,15 +255,14 @@ class Crud extends GeneratorCommand
         $model = new $class;
         $columns = $model->getFillable();
         $str = '$' . $lower. ' = ' . $name . '::find($this->primaryId);' . PHP_EOL . PHP_EOL;
-        $padding = '        ';
         $c = 1;
         foreach ($columns as $column) {
             if ($column != 'created_at' || $column != 'updated_at') {
-                $str .= $padding . '$' . $lower . '->' . str_replace('-', '_', Str::slug($column)) . '= $this->' . str_replace('-', '_', Str::slug($column)) . ';' . PHP_EOL;
+                $str .= $this->tabs(2) . '$' . $lower . '->' . str_replace('-', '_', Str::slug($column)) . '= $this->' . str_replace('-', '_', Str::slug($column)) . ';' . PHP_EOL;
             }
             $c++;
         }
-        $str .= PHP_EOL . $padding . '$' . $lower . '->save();';
+        $str .= PHP_EOL . $this->tabs(2) . '$' . $lower . '->save();';
 
         return $str;
     }
@@ -259,11 +281,6 @@ class Crud extends GeneratorCommand
         return $str;
     }
 
-    /**
-     * Get the stub file for the generator.
-     *
-     * @return string
-     */
     protected function getStub()
     {
         $this->checkIfModelExists();

@@ -18,6 +18,11 @@ class LiveCrudView extends GeneratorCommand
         'email_address',
     ];
 
+    public function tabs($i)
+    {
+        return str_repeat('    ', $i);
+    }
+
     public function handle()
     {
         if (!is_dir(resource_path('views/livewire'))) {
@@ -39,7 +44,8 @@ class LiveCrudView extends GeneratorCommand
             '{{ nameLowerPlural }}' =>Str::of($this->arguments()['name'])->lower()->plural(),
             '{{ headings }}' => $this->getHeadings(),
             '{{ renderedData }}' => $this->getRenderedData(),
-            '{{ form }}' => $this->getForm()
+            '{{ form }}' => $this->getForm(),
+            '{{ viewModal }}' => $this->getViewModal()
         ];
 
         return str_replace(array_keys($array), array_values($array), $content);
@@ -52,12 +58,11 @@ class LiveCrudView extends GeneratorCommand
         $columns = $model->getFillable();
         $columnCount = count($columns);
         $str = '';
-        $padding = '                                        ';
         $c = 1;
         foreach ($columns as $column) {
             if ($column != 'created_at' || $column != 'updated_at') {
                 if ($c != 1) {
-                    $str .= $padding;
+                    $str .= $this->tabs(10);
                 }
 
                 if ($this->getType($column) == 'foreignid') {
@@ -99,11 +104,50 @@ class LiveCrudView extends GeneratorCommand
 
         $output = "<div><label class='block'><span class='text-gray-700 @error('{$name}') text-red-500  @enderror'>{$label}</span>";
         $output .= "<select class='mt-1 block w-full rounded-md border-gray-300 shadow-sm @error('{$name}') border-red-500 @enderror focus:border-indigo-300 focus:ring focus:ring-indigo-200 focus:ring-opacity-50' wire:model='{$name}'>" . PHP_EOL;
-        $output .= '@foreach($' . $pluralLower . ' as $' . $singularLower . ')' . PHP_EOL;
-        $output .= '<option value="{{ $' . $singularLower . '->id }}" wire:key="' . $singularLower . '-{{ $' . $singularLower . '->id }}">{{ $' . $singularLower . '->name }}</option>'. PHP_EOL;
-        $output .= "@endforeach" . PHP_EOL;
-        $output .= "</select>" . PHP_EOL;
-        $output .= "@error('{$name}')<span class='text-red-500 text-sm'>{$message}</span>@enderror</label></div>";
+        $output .= $this->tabs(10) . '@foreach($' . $pluralLower . ' as $' . $singularLower . ')' . PHP_EOL;
+        $output .= $this->tabs(10) . '<option value="{{ $' . $singularLower . '->id }}" wire:key="' . $singularLower . '-{{ $' . $singularLower . '->id }}">{{ $' . $singularLower . '->' . $displayField . ' }}</option>'. PHP_EOL;
+        $output .= $this->tabs(10) . "@endforeach" . PHP_EOL;
+        $output .= $this->tabs(10) . "</select>" . PHP_EOL;
+        $output .= $this->tabs(10) . "@error('{$name}')<span class='text-red-500 text-sm'>{$message}</span>@enderror</label></div>";
+
+        return $output;
+    }
+
+    public function getViewModal () {
+        $class = 'App\\Models\\' . $this->arguments()['name'];
+        $model = new $class;
+        $columns = $model->getFillable();
+        $columnCount = count($columns);
+        $str = '';
+        $c = 1;
+        foreach ($columns as $column) {
+            if ($column != 'created_at' || $column != 'updated_at') {
+                if ($c != 1) {
+                    $str .= $this->tabs(10);
+                }
+
+                $str .= $this->makeViewLine($column);
+
+                if ($c != $columnCount) {
+                    $str .= PHP_EOL;
+                }
+            }
+            $c++;
+        };
+        return $str;
+    }
+
+    public function makeViewLine($name)
+    {
+        $type = $this->getType($name);
+        if ($type == 'foreignid'){
+            $name = substr($name, 0,-3);
+        }
+        $label = ucfirst(str_replace('-', ' ', Str::slug($name)));
+        
+        $output = "<div><label class='block'><span class='text-gray-700'>{$label}</span>";
+        $output .= "<input type='text' class='mt-1 block w-full rounded-md border-gray-300 shadow-sm' disabled wire:model='{$name}'>";
+        $output .= '</label></div>';
 
         return $output;
     }
@@ -129,22 +173,17 @@ class LiveCrudView extends GeneratorCommand
         $columns = $model->getFillable();
         $columnCount = count($columns);
         $str = '';
-        $padding = '                                    ';
         $c = 1;
         foreach ($columns as $column) {
             if ($column != 'created_at' || $column != 'updated_at') {
-                if ($c == 1) {
-                    if ($c == $columnCount) {
-                        $str .= $this->getDynamicData($column);
-                    } else {
-                        $str .= $this->getDynamicData($column) . PHP_EOL;
-                    }
-                } else {
-                    if ($c == $columnCount) {
-                        $str .= $padding . $this->getDynamicData($column);
-                    } else {
-                        $str .= $padding . $this->getDynamicData($column) . PHP_EOL;
-                    }
+                if ($c != 1) {
+                    $str .= $this->tabs(9);
+                }
+
+                $str .= $this->getDynamicData($column);
+
+                if ($c != $columnCount) {
+                    $str .= PHP_EOL;
                 }
             }
             $c++;
@@ -174,7 +213,6 @@ class LiveCrudView extends GeneratorCommand
         $columnCount = count($columns);
         $c = 1;
         $str = '';
-        $padding = '                            ';
         foreach ($columns as $column) {
             if ($column != 'created_at' || $column != 'updated_at') {
                 if ($this->getType($column) == 'foreignid') {
@@ -182,7 +220,7 @@ class LiveCrudView extends GeneratorCommand
                 }
                 $heading = str_replace('-', ' ', Str::slug($column));
                 if ($c!=1) {
-                    $str .= $padding;
+                    $str .= $this->tabs(7);
                 }
                 $str .= $this->getInput($heading);
                 if ($c != $columnCount) {

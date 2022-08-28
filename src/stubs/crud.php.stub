@@ -18,6 +18,8 @@ class {{ name }}LiveComponent extends Component
 
     public $showForm = false;
 
+    public $showViewModal = false;
+
     public $primaryId = null;
 
     public $search;
@@ -56,6 +58,15 @@ class {{ name }}LiveComponent extends Component
         {{ setedibleval }}
 
         $this->showForm = true;
+    }
+
+    public function view($primaryId)
+    {
+        $this->primaryId = $primaryId;
+
+        {{ viewCode }}
+
+        $this->showViewModal = true;
     }
 
     public function closeForm()
