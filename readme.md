@@ -6,10 +6,10 @@
 
 ## Installation
 
-Via Composer
+Via Composer (currently requires VCS)
 
 ``` bash
-composer require imritesh/livecrud
+composer require zkeene/livecrud
 ```
 
 ## Prerequisites
