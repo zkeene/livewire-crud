@@ -213,7 +213,7 @@ class Crud extends GeneratorCommand
                     $column = substr($column, 0, -3);
                     $classCol = 'App\\Models\\' . ucfirst($column);
                     $modelCol = new $classCol;
-                    $displayField = $modelCol->displayField;
+                    $displayField = $modelCol->crudInfo['displayField'];
                     $str .= $this->tabs(2) . '$this->' . str_replace('-', '_', Str::slug($column)) . ' = $' . $lower . '->' . $column . '->' . $displayField . ';';
                 } else {
                     $str .= $this->tabs(2) . '$this->' . str_replace('-', '_', Str::slug($column)) . ' = $' . $lower . '->' . $column . ';';

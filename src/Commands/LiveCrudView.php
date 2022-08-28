@@ -100,7 +100,7 @@ class LiveCrudView extends GeneratorCommand
 
         $class = 'App\\Models\\' . $label;
         $model = new $class;
-        $displayField = $model->displayField;
+        $displayField = $model->crudInfo['displayField'];
 
         $output = "<div><label class='block'><span class='text-gray-700 @error('{$name}') text-red-500  @enderror'>{$label}</span>";
         $output .= "<select class='mt-1 block w-full rounded-md border-gray-300 shadow-sm @error('{$name}') border-red-500 @enderror focus:border-indigo-300 focus:ring focus:ring-indigo-200 focus:ring-opacity-50' wire:model='{$name}'>" . PHP_EOL;
@@ -198,7 +198,7 @@ class LiveCrudView extends GeneratorCommand
         if ($this->getType($column) == 'foreignid') {
             $class = 'App\\Models\\' . ucfirst(substr($column, 0, -3));
             $model = new $class;
-            $displayField = $model->displayField;
+            $displayField = $model->crudInfo['displayField'];
             return '<td class="px-6 py-4 whitespace-nowrap">{{ $'. $modelName . '->' . substr($column, 0, -3) . '->' . $displayField . '}}</td>';
         } else {
             return '<td class="px-6 py-4 whitespace-nowrap">{{ $'. $modelName . '->' . $column . ' }}</td>';
